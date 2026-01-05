@@ -1,5 +1,3 @@
-<h1 align="center"><strong>SORRY, NOT ALL MY STUFF IS HERE 😔</strong></h1>
-
 <table align="center">
   <tr>
     <td align="center">
