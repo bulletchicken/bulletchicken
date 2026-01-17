@@ -9,10 +9,10 @@
 │ ╚═╝╚═╝╚══════╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝   ╚═╝      ╚══════╝ ╚═════╝        │
 │                                                                              │
 │   jeremy@mac:~$ whoami                                                       │
-│   jeremy                                                                    │
+│   jeremy                                                                     │
 │                                                                              │
 │   jeremy@mac:~$ cat profile.txt                                              │
-│   role: software / creative systems                                          │
+│   school: University of Waterloo                                             │
 │   status: online                                                             │
 │   contact: j87su@uwaterloo.ca                                                │
 │                                                                              │
