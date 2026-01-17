@@ -1,13 +1,11 @@
-<table align="center">
-  <tr>
-    <td align="center">
-      <img src="https://media1.tenor.com/m/X5Axnr7X7d8AAAAC/gato-cat.gif" alt="Wet Cat Energy" width="220"/>
-    </td>
-    <td valign="middle">
-      <p>
-        <strong>hi, i'm jeremy.</strong><br/><br/>
-        💌 <a href="mailto:j87su@uwaterloo.ca">j87su@uwaterloo.ca</a><br/>
-      </p>
-    </td>
-  </tr>
-</table>
+<div align="center">
+  <img src="mona_lisa.webp" alt="Mona Lisa (remix)" width="300"/>
+  <img src="statue.webp" alt="Statue" width="300"/>
+  <img src="waterloo_sticky.webp" alt="Waterloo sticker" width="300"/>
+</div>
+
+<br/>
+
+<div align="center">
+  <sub>jeremy · <a href="mailto:j87su@uwaterloo.ca">j87su@uwaterloo.ca</a></sub>
+</div>
