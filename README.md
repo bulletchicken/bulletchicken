@@ -21,3 +21,5 @@
                (``''--..._____...--''``)
                 `"--...__     __...--"`
                          `````
+
+![](./profile-3d-contrib/profile-green-animate.svg)
