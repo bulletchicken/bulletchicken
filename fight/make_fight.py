@@ -56,6 +56,7 @@ from PIL import ImageFont
 # ---------------------------------------------------------------- constants
 T = 31.0
 EPS = 0.002
+LEAD_TRIM = 0.25      # the whole loop starts this much sooner (the calm opening is shortened)
 W, H, FLOOR = 830, 277, 272
 H1_Y, RULE_Y = 32, 50
 P_Y = [84, 124, 164, 204]
@@ -202,6 +203,12 @@ def window_track(track, t0, t1):
 
 def animate(attr, track, fmt):
     keys = track.finished()
+    # shift everything earlier by LEAD_TRIM; the loop still ends at T, with the tail hold absorbing it
+    keys = [[0.0, keys[0][1], "lin"]] + [[max(EPS, t - LEAD_TRIM), v, e] for t, v, e in keys[1:]]
+    for i in range(1, len(keys)):
+        if keys[i][0] <= keys[i - 1][0]:
+            keys[i][0] = keys[i - 1][0] + EPS / 2
+    keys[-1][0] = T
     vals = ";".join(fmt(v) for _, v, _ in keys)
     kt = ";".join(f"{t / T:.6f}" for t, _, _ in keys)
     if any(e != "lin" for _, _, e in keys[1:]):
@@ -727,17 +734,20 @@ class Word:
         self.tr.add(t1, (0.0, 0.0), "inout")
         self.rot.add(t1, 0.0, "inout")
 
-    def slice(self, t, angle, fall=((-26, 70), (24, -120))):
+    def slice(self, t, angle, fall=((-26, 70), (24, -120)), through=None):
+        """Cut along a line at `angle` degrees. `through` is a page point the line passes through
+        (where the blade actually crossed the word); defaults to the word's centre."""
         self.animated = True
         self.op.set(t, 0)
         a = math.radians(angle)
         d, nn = (math.cos(a), math.sin(a)), (-math.sin(a), math.cos(a))
         self.halves = []
+        c = through if through else (self.cx, self.cy)
         for sgn, (ddx, drot) in zip((1, -1), fall):
             hw = Word(self.text, self.x, self.y, self.w, self.size, self.fixed, bold=self.bold)
             hw.op = Track(0)
             hw.op.set(t, 1)
-            L, c = 120, (self.cx, self.cy)
+            L = 120
             hw.clip = [(c[0] + d[0] * L, c[1] + d[1] * L), (c[0] - d[0] * L, c[1] - d[1] * L),
                        (c[0] - d[0] * L + sgn * nn[0] * L, c[1] - d[1] * L + sgn * nn[1] * L),
                        (c[0] + d[0] * L + sgn * nn[0] * L, c[1] + d[1] * L + sgn * nn[1] * L)]
@@ -1210,6 +1220,15 @@ def heavy_upswing(c, t_contact):
     jolt(t_contact, 1.2)
 
 
+def blade_cut_point(c, t, wd):
+    """Where the blade's line (hand -> tip) crosses the word's centre height at time t."""
+    (hx, hy), (tx, ty) = c.world(t, "RH"), c.world(t, "WT")
+    if abs(ty - hy) < 1e-6:
+        return (tx, wd.cy)
+    k = (wd.cy - hy) / (ty - hy)
+    return (hx + (tx - hx) * k, wd.cy)
+
+
 def hop(c, t0, t1, x, y, h=14, land_amt=0.22):
     c.pose(t0 - 0.06, "crouch", 0.06)
     c.takeoff(t0)
@@ -1458,39 +1477,39 @@ S1.dip(8.41)
 red.pose(8.34, "crouch", 0.08)
 red.pose(8.48, "sw_low", 0.12, "inout")
 red.takeoff(8.52)
-red.jump(8.52, 8.8, S1.x - 26, P_Y[3] + 1, 46)
+red.jump(8.52, 8.8, S1.x + 26, P_Y[3] + 1, 46)
 red.land(8.8, 0.16, pose=None)
 red.pose(8.88, "sw_upcut", 0.1, "snap")
 red.pose(9.0, "sw_upthru", 0.1, "out")
 _c = red.world(8.84, "N")
 crescent(_c[0] + 10, _c[1] + 6, 44, 150, 250, 8.83, 0.13)
-S1.slice(8.84, -33, fall=((-20, 60), (26, -110)))
+S1.slice(8.84, -32, fall=((-20, 60), (26, -110)), through=blade_cut_point(red, 8.84, S1))
 jolt(8.84, 1.2)
 hop(ink, 8.58, 8.83, S2.cx, P_Y[2] + 1)
 S2.dip(8.83)
 # cut 2: the blade is already overhead. He jumps and brings it straight down onto the next word.
 red.pose(8.98, "sw_up", 0.14, "inout")
 red.takeoff(9.1)
-red.jump(9.1, 9.42, S2.x - 26, P_Y[2] + 1, 54)
+red.jump(9.1, 9.42, S2.x + 10, P_Y[2] + 1, 54)
 red.pose(9.46, "sw_down", 0.045, "snap")
 red.land(9.46, 0.18, pose=None)
 red.pose(9.53, "sw_thru", 0.07, "out")
 _c = red.world(9.44, "N")
 crescent(_c[0] + 8, _c[1] + 2, 42, -120, 60, 9.45, 0.13)
-S2.slice(9.46, 35, fall=((-26, 70), (24, -120)))
+S2.slice(9.46, 35, fall=((-26, 70), (24, -120)), through=blade_cut_point(red, 9.46, S2))
 jolt(9.46, 1.2)
 hop(ink, 9.1, 9.35, S3.cx, P_Y[1] + 1)
 S3.dip(9.35)
 # cut 3: the blade is low after the follow-through. He turns it over and rises through "README,".
 red.pose(9.8, "sw_low", 0.2, "inout")
 red.takeoff(9.9)
-red.jump(9.9, 10.18, S3.x - 26, P_Y[1] + 1, 46)
+red.jump(9.9, 10.18, S3.x + 42, P_Y[1] + 1, 46)
 red.land(10.18, 0.16, pose=None)
 red.pose(10.26, "sw_upcut", 0.1, "snap")
 red.pose(10.38, "sw_upthru", 0.1, "out")
 _c = red.world(10.22, "N")
 crescent(_c[0] + 10, _c[1] + 6, 44, 150, 250, 10.21, 0.13)
-S3.slice(10.22, -33, fall=((-20, 60), (26, -110)))
+S3.slice(10.22, -32, fall=((-20, 60), (26, -110)), through=blade_cut_point(red, 10.22, S3))
 jolt(10.22, 1.2)
 red.pose(10.6, "sw_rec", 0.18, "inout")
 red.pose(10.68, "sw_idle", 0.12)
@@ -1560,11 +1579,17 @@ def stuck_katana(hilt, tip, t_in, t_out, tugs=(), seed=1):
                (ex + L * math.cos(a), ey + L * math.sin(a))]
         cracks.append(grow(path_d(pts), polyline_len(pts), 1.1 if i < 4 else 0.7, t_in, 0.12))
 
+    cid = f"floor{int(hx)}"
+
     def svg(p):
         return ('<g opacity="0">' + animate("opacity", op, str)
-                + f'<g fill="none" stroke="{p["fg"]}" stroke-linecap="round" stroke-linejoin="round" opacity="0.75">' + "".join(cracks) + "</g>"
-                + "<g>" + animate_tf("rotate", wob, lambda a: f"{n(a)} {n(ex)} {n(ey)}")
-                + katana_svg(katana_parts(dict(RH=(hx, hy), WT=(tx, ty))), p) + "</g></g>")
+                + f'<clipPath id="{cid}"><rect x="{n(hx - 60)}" y="-20" width="140" height="{n(FLOOR + 20)}"/></clipPath>'
+                + f'<g clip-path="url(#{cid})"><g>' + animate_tf("rotate", wob, lambda a: f"{n(a)} {n(ex)} {n(ey)}")
+                + katana_svg(katana_parts(dict(RH=(hx, hy), WT=(tx, ty))), p) + "</g></g>"
+                # the entry slit, a short dark gash the blade disappears into
+                + f'<path d="M{n(ex - 4.5)},{n(ey - 0.6)} L{n(ex + 4.5)},{n(ey + 0.6)}" stroke="{p["fg"]}" stroke-width="2.2" stroke-linecap="round" opacity="0.85"/>'
+                + f'<g fill="none" stroke="{p["fg"]}" stroke-linecap="round" stroke-linejoin="round" opacity="0.8">' + "".join(cracks) + "</g>"
+                + "</g>")
     layer("props", svg)
     # chips of floor
     def chips(p):
