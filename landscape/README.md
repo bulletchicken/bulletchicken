@@ -1,42 +1,7 @@
-# Contribution landscape
+# Landscape source moved
 
-The ink landscape at the top of the profile README uses **bulletchicken’s GitHub profile contribution calendar**, the same data source as this repository’s 3D contribution graph. It includes the contributions GitHub records on the profile, such as commits, issues, pull requests, and reviews, along with private contribution counts exposed by the profile’s visibility settings.
+The maintained project lives at **[bulletchicken/ink-landscape](https://github.com/bulletchicken/ink-landscape)**, including the white, green, and charcoal editions, generator, tests, setup instructions, and original commit history.
 
-Only aggregate daily counts are saved and published. The fetch does not query private repository names, commit messages, or activity details.
+The profile README now loads the white image directly from that repository. Its **Refresh landscape** workflow updates the contribution data and artwork daily; this profile repository no longer runs a separate landscape refresh.
 
-## Reading the landscape
-
-- Dates and counts come directly from GitHub’s default profile contribution calendar, including any current-day entries or display-week padding. The calendar supplies the window; no separate start or end date is imposed.
-- Contributions are grouped into the calendar months touched by that window, usually 13 bins. The first and last months may be partial. Visible labels show the month and year; exact dates remain available in the saved data and SVG tooltips when the image is opened directly.
-- Main mountain height grows with the square of monthly contributions, with a small minimum height for nonzero months. Above that floor, 150:100:50 contributions gives heights in the ratio 9:4:1. The tallest month sets the scale for the current window.
-- Month/year labels, monthly contribution totals, and small daily calendars travel with their mountains.
-- Distant peaks, connected land, trees, clouds, water, and fish are decorative. Their sizes and quantities do not encode additional activity.
-
-The scene loops every 180 seconds with several layers moving at different speeds. Twenty fish positions take turns, with a jump about every 3 seconds and each flight lasting 1.2 seconds. Their pattern repeats every 60 seconds. The artwork uses native SVG animation; reduced-motion preferences select a still image and disable motion inside the animated SVG as well.
-
-The drawing uses black outlines and pale gray washes on white paper. The background stays white to the outer edges, and the landscape softly fades into it at the sides.
-
-## Refresh
-
-The GitHub workflow refreshes the data and both images nightly at **06:23 UTC**, replacing the former Commit City refresh. It can also be run manually from the repository’s Actions tab.
-
-From the repository root:
-
-```sh
-python3 landscape/scripts/fetch_activity.py --user bulletchicken
-python3 landscape/scripts/generate.py
-```
-
-The scripts use the Python standard library. The nightly workflow reuses its existing `GITHUB_TOKEN`; no personal access token setup is needed. To fetch locally, provide `GITHUB_TOKEN` or authenticate with the GitHub CLI (`gh auth login`). Generation uses the saved activity data and requires no network access.
-
-## Files and attribution
-
-- `assets/nocturne.svg`: animated landscape embedded in the profile README.
-- `assets/nocturne-still.svg`: reduced-motion alternative.
-- `data/activity.json`: aggregate daily profile contribution counts and the calendar’s date range.
-- `scripts/fetch_activity.py`: refreshes the profile contribution calendar.
-- `scripts/generate.py`: composes the landscape from that data.
-- `scripts/palette.py`: black ink, pale gray washes, and the white paper background.
-- `scripts/terrain.py`, `scripts/vegetation.py`, and `scripts/ambient.py`: procedural drawing and motion.
-
-The mountain contour and tapered-brush techniques are adapted from [Lingdong Huang’s {Shan, Shui}*](https://github.com/LingDong-/shan-shui-inf), with a monochrome palette, monthly contribution mapping, attached month/year labels, connected shoreline, parallax, and ambient details. This renderer adapts those techniques rather than running the full original engine. See [attribution and the MIT license](THIRD_PARTY_NOTICES.md).
+This directory is a historical copy. Make future landscape changes in the standalone project so the profile and all themes stay in sync. The original [third-party attribution](THIRD_PARTY_NOTICES.md) remains preserved here.
