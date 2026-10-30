@@ -1,4 +1,4 @@
-name: Commit Landscape
+name: Contribution Landscape
 
 on:
   schedule:
@@ -26,9 +26,9 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Fetch public commit activity
+      - name: Fetch full profile contribution calendar
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python3 landscape/scripts/fetch_activity.py --user "$GITHUB_REPOSITORY_OWNER"
 
       - name: Draw the SVG landscape
@@ -45,7 +45,7 @@ jobs:
             echo 'The landscape is already up to date.'
             exit 0
           fi
-          git commit -m 'Refresh commit landscape'
+          git commit -m 'Refresh contribution landscape'
 
           # Reapply this generated-files commit over concurrent profile updates.
           # A normal push rejects any intervening change instead of overwriting it.
